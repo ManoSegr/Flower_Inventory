@@ -1,0 +1,208 @@
+@model FlowerShop.Web.Models.FlowerListVm
+@{
+    ViewData["Title"] = "Flowers";
+    string NextDir(string col) => (Model.Sort?.Equals(col, StringComparison.OrdinalIgnoreCase) == true && !Model.Desc) ? "true" : "false";
+    string ActiveSort(string col) => Model.Sort?.Equals(col, StringComparison.OrdinalIgnoreCase) == true ? (Model.Desc ? "↓" : "↑") : "";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Flowers</h1>
+    <div class="d-flex gap-2">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Flower
+        </a>
+    </div>
+</div>
+
+<form method="get" class="card mb-3">
+  <div class="card-body">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label">Search</label>
+        <input name="q" value="@Model.Q" class="form-control" placeholder="name, category..." />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Category</label>
+        <select name="categoryId" class="form-select" asp-items="Model.CategoryOptions">
+          <option value="">-- any --</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Min Price</label>
+        <input name="minPrice" value="@(Model.MinPrice?.ToString())" inputmode="decimal" class="form-control" />
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Max Price</label>
+        <input name="maxPrice" value="@(Model.MaxPrice?.ToString())" inputmode="decimal" class="form-control" />
+      </div>
+
+      <!-- Button column -->
+      <div class="col-md-1 d-grid">
+        <button type="submit" class="btn btn-outline-primary">Filter</button>
+      </div>
+    </div>
+  </div>
+</form>
+
+
+@if (Model.Total == 0)
+{
+    <div class="text-center py-5">
+        <div class="text-muted mb-3">
+            <i class="fas fa-seedling fa-3x"></i>
+        </div>
+        <h4>No results</h4>
+        <p class="text-muted">Try different filters or add your first flower.</p>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width:80px;">Image</th>
+                    <th>
+                        <a asp-action="Index"
+                           asp-route-q="@Model.Q"
+                           asp-route-categoryId="@Model.CategoryId"
+                           asp-route-minPrice="@Model.MinPrice"
+                           asp-route-maxPrice="@Model.MaxPrice"
+                           asp-route-sort="name"
+                           asp-route-desc="@NextDir("name")"
+                           asp-route-page="@Model.Page"
+                           asp-route-pageSize="@Model.PageSize">
+                            Name @ActiveSort("name")
+                        </a>
+                    </th>
+                    <th>SKU</th>
+                    <th>
+                        <a asp-action="Index"
+                           asp-route-q="@Model.Q"
+                           asp-route-categoryId="@Model.CategoryId"
+                           asp-route-minPrice="@Model.MinPrice"
+                           asp-route-maxPrice="@Model.MaxPrice"
+                           asp-route-sort="category"
+                           asp-route-desc="@NextDir("category")"
+                           asp-route-page="@Model.Page"
+                           asp-route-pageSize="@Model.PageSize">
+                            Category @ActiveSort("category")
+                        </a>
+                    </th>
+                    <th class="text-end">
+                        <a asp-action="Index"
+                           asp-route-q="@Model.Q"
+                           asp-route-categoryId="@Model.CategoryId"
+                           asp-route-minPrice="@Model.MinPrice"
+                           asp-route-maxPrice="@Model.MaxPrice"
+                           asp-route-sort="price"
+                           asp-route-desc="@NextDir("price")"
+                           asp-route-page="@Model.Page"
+                           asp-route-pageSize="@Model.PageSize">
+                            Price @ActiveSort("price")
+                        </a>
+                    </th>
+                    <th class="text-end">Stock</th>
+                    <th>Status</th>
+                    <th style="width:220px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var f in Model.Items)
+            {
+                <tr>
+                    <td>
+                        @if (!string.IsNullOrWhiteSpace(f.ImageUrl))
+                        {
+                            <img src="@f.ImageUrl" alt="image" style="height:48px;object-fit:cover;border-radius:6px;" />
+                        }
+                    </td>
+                    <td class="fw-semibold">
+                        @f.Name
+                        @if (!string.IsNullOrWhiteSpace(f.Color))
+                        {
+                            <div class="small text-muted">@f.Color</div>
+                        }
+                    </td>
+                    <td>@f.SKU</td>
+                    <td>@f.Category?.Name</td>
+                    <td class="text-end">@f.Price.ToString("C")</td>
+                    <td class="text-end">@f.QuantityInStock</td>
+                    <td>
+                        @if (f.Active)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inactive</span>
+                        }
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a asp-action="Details" asp-route-id="@f.FlowerId" class="btn btn-sm btn-outline-primary">Details</a>
+                            <a asp-action="Edit" asp-route-id="@f.FlowerId" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@f.FlowerId" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="pagination" class="mt-3">
+        <ul class="pagination">
+            @{
+                int prev = Math.Max(1, Model.Page - 1);
+                int next = Math.Min(Model.TotalPages, Model.Page + 1);
+            }
+            <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-q="@Model.Q"
+                   asp-route-categoryId="@Model.CategoryId"
+                   asp-route-minPrice="@Model.MinPrice"
+                   asp-route-maxPrice="@Model.MaxPrice"
+                   asp-route-sort="@Model.Sort"
+                   asp-route-desc="@Model.Desc"
+                   asp-route-page="@prev"
+                   asp-route-pageSize="@Model.PageSize">Prev</a>
+            </li>
+
+            @for (var p = 1; p <= Model.TotalPages; p++)
+            {
+                <li class="page-item @(p == Model.Page ? "active" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-q="@Model.Q"
+                       asp-route-categoryId="@Model.CategoryId"
+                       asp-route-minPrice="@Model.MinPrice"
+                       asp-route-maxPrice="@Model.MaxPrice"
+                       asp-route-sort="@Model.Sort"
+                       asp-route-desc="@Model.Desc"
+                       asp-route-page="@p"
+                       asp-route-pageSize="@Model.PageSize">@p</a>
+                </li>
+            }
+
+            <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-q="@Model.Q"
+                   asp-route-categoryId="@Model.CategoryId"
+                   asp-route-minPrice="@Model.MinPrice"
+                   asp-route-maxPrice="@Model.MaxPrice"
+                   asp-route-sort="@Model.Sort"
+                   asp-route-desc="@Model.Desc"
+                   asp-route-page="@next"
+                   asp-route-pageSize="@Model.PageSize">Next</a>
+            </li>
+        </ul>
+    </nav>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

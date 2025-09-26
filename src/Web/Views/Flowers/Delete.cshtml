@@ -1,0 +1,68 @@
+@model FlowerShop.Domain.Flower
+@{
+    ViewData["Title"] = "Delete Flower";
+}
+
+<h1 class="mb-3">Delete Flower</h1>
+
+<div class="alert alert-warning" role="alert">
+    <strong>Are you sure?</strong> This will permanently delete the flower record.
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" alt="image" style="max-width:100%;border-radius:8px;" />
+                }
+                else
+                {
+                    <div class="text-muted">No image</div>
+                }
+            </div>
+            <div class="col-md-9">
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Name</dt>
+                    <dd class="col-sm-9">@Model.Name</dd>
+
+                    <dt class="col-sm-3">SKU</dt>
+                    <dd class="col-sm-9">@Model.SKU</dd>
+
+                    <dt class="col-sm-3">Category</dt>
+                    <dd class="col-sm-9">@Model.Category?.Name (@Model.CategoryId)</dd>
+
+                    <dt class="col-sm-3">Price</dt>
+                    <dd class="col-sm-9">@Model.Price.ToString("C")</dd>
+
+                    <dt class="col-sm-3">Stock</dt>
+                    <dd class="col-sm-9">@Model.QuantityInStock</dd>
+
+                    <dt class="col-sm-3">Active</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.Active)
+                        { <span class="badge bg-success">Active</span> }
+                        else
+                        { <span class="badge bg-secondary">Inactive</span> }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form asp-action="Delete" method="post" class="d-flex gap-2">
+    
+    <input type="hidden" asp-for="FlowerId" />
+    <button type="submit" class="btn btn-danger">
+        <i class="fas fa-trash"></i> Delete
+    </button>
+    <a asp-action="Details" asp-route-id="@Model.FlowerId" class="btn btn-secondary">
+        Cancel
+    </a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

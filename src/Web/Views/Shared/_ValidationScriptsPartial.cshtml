@@ -1,0 +1,19 @@
+﻿<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+// number: δέχεται 123, 123,45, -5,30
+$.validator.methods.number = function (value, element) {
+    if (this.optional(element)) return true;
+    return /^-?\d+(,\d+)?$/.test(value);
+};
+
+// range: μετατρέπει κόμμα -> τελεία πριν τον έλεγχο
+$.validator.methods.range = function (value, element, param) {
+    if (this.optional(element)) return true;
+    var v = (value || '').replace(',', '.');
+    var n = parseFloat(v);
+    return !isNaN(n) && n >= param[0] && n <= param[1];
+};
+</script>
