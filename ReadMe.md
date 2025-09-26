@@ -26,7 +26,7 @@ Production‑ready sample that implements a small flower inventory with **Catego
 
 ```powershell
 # Start SQL Server 2022
-$sa = "Your_strong_password_123!"
+$sa = "Passw0rd"
 docker run -d --name mssql -e ACCEPT_EULA=Y -e SA_PASSWORD=$sa -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest
 ```
 
@@ -53,7 +53,7 @@ Update the connection string **Default** (Development/Production as appropriate)
 ```json
 {
   "ConnectionStrings": {
-    "Default": "Server=127.0.0.1,1433;Database=FlowerShop;User Id=sa;Password=Your_strong_password_123!;TrustServerCertificate=True"
+    "Default": "Server=127.0.0.1,1433;Database=FlowerShop;User Id=sa;Password=Passw0rd;TrustServerCertificate=True"
   }
 }
 ```
